@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Diff Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #343a40;
+            --light-text-color: #6c757d;
+            --header-bg-color: #e9ecef;
+            --added-color: #d4edda;
+            --removed-color: #f8d7da;
+            --added-border: #28a745;
+            --removed-border: #dc3545;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.8em;
+            font-weight: 700;
+            border-bottom: 4px solid var(--primary-color);
+            padding-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .report-info {
+            text-align: left;
+            margin-bottom: 30px;
+            font-size: 1em;
+            color: var(--light-text-color);
+            background-color: var(--header-bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .report-info p {
+            margin: 8px 0;
+        }
+
+        .report-info strong {
+            color: var(--secondary-color);
+        }
+
+        .summary-section {
+            background-color: #eaf4f7;
+            border: 1px solid #cce5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-section h3 {
+            color: #0056b3;
+            margin-top: 0;
+            font-size: 1.5em;
+            border-bottom: 1px solid #b3d9ff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-section p {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .summary-section .highlight {
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            color: var(--secondary-color);
+            margin-top: 45px;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 700;
+            border-left: 6px solid var(--primary-color);
+            padding: 10px 15px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+            background-color: #f0f4f8;
+            border-radius: 0 5px 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible-header::after {
+            content: '\25B6'; /* Right-pointing triangle */
+            font-size: 0.8em;
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-header.active::after {
+            content: '\25BC'; /* Down-pointing triangle */
+            transform: rotate(90deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            overflow: hidden;
+            padding: 0 15px;
+            background-color: var(--card-background);
+            border-left: 6px solid var(--primary-color);
+            border-radius: 0 0 8px 8px;
+            margin-top: -20px; /* Adjust to overlap with header border-radius */
+            padding-top: 20px;
+        }
+
+        .collapsible-content.show {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--card-background);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.95em;
+        }
+
+        th {
+            background-color: var(--header-bg-color);
+            font-weight: 700;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f6f6f6;
+        }
+
+        tr:hover {
+            background-color: #e9f5ff;
+            transition: background-color 0.3s ease;
+        }
+
+        .added {
+            background-color: var(--added-color);
+            border-left: 5px solid var(--added-border);
+        }
+
+        .removed {
+            background-color: var(--removed-color);
+            border-left: 5px solid var(--removed-border);
+        }
+
+        .diff-content {
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+            background-color: #fdfdfd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+            overflow-x: auto;
+            font-size: 0.9em;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .diff-line-added,
+        .diff-line-removed,
+        .diff-line-unchanged {
+            display: flex;
+            padding: 2px 5px;
+            margin: 0 -5px;
+        }
+
+        .diff-line-added {
+            background-color: #e6ffe6;
+            border-left: 3px solid #28a745;
+        }
+
+        .diff-line-removed {
+            background-color: #ffe6e6;
+            border-left: 3px solid #dc3545;
+        }
+
+        .diff-line-unchanged {
+            background-color: #fdfdfd;
+            color: #555;
+        }
+
+        .line-num-old, .line-num-new {
+            width: 40px; /* Adjust as needed */
+            text-align: right;
+            padding-right: 10px;
+            color: #999;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+        .diff-header {
+            font-weight: bold;
+            color: #007bff;
+            background-color: #e9f5ff;
+            display: block;
+            padding: 5px;
+            margin: 0 -15px;
+            border-bottom: 1px solid #cce5ff;
+            border-top: 1px solid #cce5ff;
+        }
+
+        .no-changes {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            padding: 20px;
+            background-color: #fdfdfd;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+                margin: 10px auto;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Access Diff Report</h1>
+        <div class="report-info">
+            <p><strong>Report Generated:</strong> {{report_datetime}}</p>
+            <p><strong>File 1:</strong> {{file1_path}}</p>
+            <p><strong>File 2:</strong> {{file2_path}}</p>
+        </div>
+
+        <div class="summary-section">
+            <h3>Summary of Changes</h3>
+            <p>Total Table Changes: <span class="highlight">{{total_table_changes}}</span></p>
+            <p>Total VBA/Form Changes: <span class="highlight">{{total_vba_changes}}</span></p>
+        </div>
+
+        <h2 class="collapsible-header">Table Differences</h2>
+        <div class="collapsible-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Table</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{table_diffs_html}}
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="collapsible-header">VBA/Form Differences</h2>
+        <div class="collapsible-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Object</th>
+                        <th>Diff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{vba_diffs_html}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const headers = document.querySelectorAll('.collapsible-header');
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.style.display === "block") {
+                        content.style.display = "none";
+                    } else {
+                        content.style.display = "block";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

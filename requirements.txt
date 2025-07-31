@@ -1,0 +1,8 @@
+fire
+typer
+rich
+pyodbc
+pywin32
+openpyxl
+pytest
+nuitka
