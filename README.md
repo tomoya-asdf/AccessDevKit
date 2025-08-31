@@ -1,3 +1,5 @@
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/files-to-prompt/blob/master/LICENSE)
+
 # AccessDevKit
 
 Microsoft Access 開発を支援するためのCLIツールセットです。差分比較、ファイル展開、オブジェクトのエクスポート/インポート、未使用オブジェクト分析、パフォーマンス測定、リリース準備、オブジェクト内検索など、Access開発の様々なタスクを効率化します。
